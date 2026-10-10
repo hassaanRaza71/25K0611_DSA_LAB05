@@ -38,16 +38,16 @@ public:
     void print() {
         stack<string> tempStack;
         string document = "";
+        stack<string> copyStack = undoStack;
 
-        while (!undoStack.empty()) {
-            tempStack.push(undoStack.top());
-            undoStack.pop();
+        while (!copyStack.empty()) {
+            tempStack.push(copyStack.top());
+            copyStack.pop();
         }
 
         while (!tempStack.empty()) {
-            string word = tempStack.top();
-            document += word + " ";
-            undoStack.push(word);
+            document += tempStack.top() + " ";
+            tempStack.pop();
         }
 
         if (!document.empty()) {
