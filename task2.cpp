@@ -1,41 +1,84 @@
 #include <iostream>
+#include <stack>
+#include <string>
+
 using namespace std;
 
-class TextEditorStack {
+class TextEditor {
 private:
-    int arr[8];
-    int topIndex;
-    const int MAX_SIZE = 8;
+    stack<string> undoStack;
+    stack<string> redoStack;
 
 public:
-    TextEditorStack() {
-        topIndex = -1;
-    }
-
-    void type(int operationCode) {
-        if (topIndex >= MAX_SIZE - 1) {
-            cout << "Stack Overflow! Cannot store more than 8 operations." << endl;
-            return;
+    void type(string word) {
+        undoStack.push(word);
+        while (!redoStack.empty()) {
+            redoStack.pop();
         }
-        topIndex++;
-        arr[topIndex] = operationCode;
-        cout << "Performed: " << operationCode << " | Current Top: " << arr[topIndex] << endl;
     }
 
     void undo() {
-        if (topIndex == -1) {
-            cout << "Undo requested | Stack is EMPTY! Nothing to undo." << endl;
+        if (undoStack.empty()) {
             return;
         }
-        int removed = arr[topIndex];
-        topIndex--;
-        
-        cout << "Undone: " << removed << " | ";
-        if (topIndex == -1) {
-            cout << "Current Top: NONE (Stack is empty)" << endl;
-        } else {
-            cout << "Current Top: " << arr[topIndex] << endl;
-        }
+        string action = undoStack.top();
+        undoStack.pop();
+        redoStack.push(action);
     }
 
+    void redo() {
+        if (redoStack.empty()) {
+            return;
+        }
+        string action = redoStack.top();
+        redoStack.pop();
+        undoStack.push(action);
+    }
+
+    void print() {
+        stack<string> tempStack;
+        string document = "";
+
+        while (!undoStack.empty()) {
+            tempStack.push(undoStack.top());
+            undoStack.pop();
+        }
+
+        while (!tempStack.empty()) {
+            string word = tempStack.top();
+            document += word + " ";
+            undoStack.push(word);
+        }
+
+        if (!document.empty()) {
+            document.pop_back();
+        }
+
+        cout << "Document: \"" << document << "\"" << endl;
+    }
 };
+
+int main() {
+    TextEditor editor;
+
+    editor.type("Hello");
+    editor.type("World");
+    editor.print();
+
+    editor.undo();
+    editor.print();
+
+    editor.redo();
+    editor.print();
+
+    editor.undo();
+    editor.print();
+
+    editor.type("There");
+    editor.print();
+
+    editor.redo();
+    editor.print();
+
+    return 0;
+}
